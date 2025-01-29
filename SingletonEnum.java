@@ -1,44 +1,46 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class SingletonEnum {
 
     public static void main(String[] args) {
-        // Задача 1: База данных
-        DatabaseConnector db1 = DatabaseConnector.getInstance();
-        DatabaseConnector db2 = DatabaseConnector.getInstance();
+        Scanner scanner = new Scanner(System.in);
+        int choice;
+        do {
+            System.out.println("\nВыберите действие:");
+            System.out.println("1. Проверить Singleton для базы данных");
+            System.out.println("2. Проверить Singleton для логирования");
+            System.out.println("3. Работать со статусами заказов");
+            System.out.println("4. Работать с сезонами года");
+            System.out.println("0. Выход");
+            System.out.print("Ваш выбор: ");
 
-        System.out.println("Database instances are the same: " + (db1 == db2));
+            choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
 
-        // Задача 2: Логирование
-        Logger logger1 = Logger.getInstance();
-        Logger logger2 = Logger.getInstance();
+            switch (choice) {
+                case 1:
+                    testDatabaseSingleton();
+                    break;
+                case 2:
+                    testLoggerSingleton();
+                    break;
+                case 3:
+                    handleOrderStatuses(scanner);
+                    break;
+                case 4:
+                    handleSeasons(scanner);
+                    break;
+                case 0:
+                    System.out.println("Выход из программы.");
+                    break;
+                default:
+                    System.out.println("Неверный выбор. Попробуйте еще раз.");
+            }
+        } while (choice != 0);
 
-        logger1.log("First log message");
-        logger2.log("Second log message");
-        logger1.displayLogs();
-
-        System.out.println("Logger instances are the same: " + (logger1 == logger2));
-
-        // Задача 3: Статусы заказа
-        Order order1 = new Order(1);
-        System.out.println("Order 1 status: " + order1.getStatus());
-        order1.changeStatus(OrderStatus.IN_PROGRESS);
-        System.out.println("Order 1 status: " + order1.getStatus());
-        order1.changeStatus(OrderStatus.DELIVERED);
-        System.out.println("Order 1 status: " + order1.getStatus());
-        order1.changeStatus(OrderStatus.CANCELLED); // Попытка отмены доставленного
-       
-        
-        Order order2 = new Order(2);
-        order2.changeStatus(OrderStatus.CANCELLED);
-        System.out.println("Order 2 status: " + order2.getStatus());
-        
-        // Задача 4: Сезоны года
-        System.out.println("Season of WINTER: " + getSeasonName(Season.WINTER));
-        System.out.println("Season of SPRING: " + getSeasonName(Season.SPRING));
-        System.out.println("Season of SUMMER: " + getSeasonName(Season.SUMMER));
-        System.out.println("Season of AUTUMN: " + getSeasonName(Season.AUTUMN));
+        scanner.close();
     }
 
 
@@ -47,7 +49,7 @@ public class SingletonEnum {
         private static DatabaseConnector instance;
 
         private DatabaseConnector() {
-            System.out.println("Creating database connection.");
+            System.out.println("Создаем подключение к базе данных.");
         }
 
         public static DatabaseConnector getInstance() {
@@ -56,6 +58,12 @@ public class SingletonEnum {
             }
             return instance;
         }
+    }
+
+    private static void testDatabaseSingleton() {
+        DatabaseConnector db1 = DatabaseConnector.getInstance();
+        DatabaseConnector db2 = DatabaseConnector.getInstance();
+        System.out.println("Экземпляры базы данных одинаковы: " + (db1 == db2));
     }
 
     // Задача 2: Singleton для логирования
@@ -85,6 +93,17 @@ public class SingletonEnum {
         }
     }
 
+    private static void testLoggerSingleton() {
+        Logger logger1 = Logger.getInstance();
+        Logger logger2 = Logger.getInstance();
+
+        logger1.log("First log message");
+        logger2.log("Second log message");
+        logger1.displayLogs();
+
+        System.out.println("Logger instances are the same: " + (logger1 == logger2));
+    }
+
     // Задача 3: Enum для статусов заказа
     enum OrderStatus {
         NEW, IN_PROGRESS, DELIVERED, CANCELLED
@@ -99,7 +118,7 @@ public class SingletonEnum {
 
         public void changeStatus(OrderStatus newStatus) {
             if (status == OrderStatus.DELIVERED && newStatus == OrderStatus.CANCELLED) {
-                System.out.println("Cannot cancel a delivered order!");
+                System.out.println("Невозможно отменить доставленный заказ!");
                 return;
             }
             this.status = newStatus;
@@ -107,6 +126,50 @@ public class SingletonEnum {
 
         public OrderStatus getStatus() {
             return status;
+        }
+    }
+
+    private static void handleOrderStatuses(Scanner scanner) {
+        System.out.print("Введите id заказа: ");
+        int orderId = scanner.nextInt();
+        scanner.nextLine();
+
+        Order order = new Order(orderId);
+        System.out.println("Заказ " + orderId + " статус: " + order.getStatus());
+
+        while (true) {
+            System.out.println("\nВыберите действие для заказа " + orderId + ":");
+            System.out.println("1. Изменить статус на IN_PROGRESS");
+            System.out.println("2. Изменить статус на DELIVERED");
+            System.out.println("3. Изменить статус на CANCELLED");
+            System.out.println("4. Посмотреть текущий статус");
+            System.out.println("0. Назад");
+            System.out.print("Ваш выбор: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    order.changeStatus(OrderStatus.IN_PROGRESS);
+                    System.out.println("Заказ " + orderId + " статус: " + order.getStatus());
+                    break;
+                case 2:
+                     order.changeStatus(OrderStatus.DELIVERED);
+                    System.out.println("Заказ " + orderId + " статус: " + order.getStatus());
+                   break;
+                case 3:
+                     order.changeStatus(OrderStatus.CANCELLED);
+                    System.out.println("Заказ " + orderId + " статус: " + order.getStatus());
+                    break;
+                case 4:
+                    System.out.println("Заказ " + orderId + " статус: " + order.getStatus());
+                    break;
+                 case 0:
+                    return;
+                default:
+                    System.out.println("Неверный выбор. Попробуйте еще раз.");
+            }
         }
     }
 
@@ -127,6 +190,40 @@ public class SingletonEnum {
                 return "Осень";
             default:
                 return "Неизвестное время года";
+        }
+    }
+
+    private static void handleSeasons(Scanner scanner) {
+        while (true) {
+            System.out.println("\nВыберите сезон для просмотра:");
+            System.out.println("1. Зима");
+            System.out.println("2. Весна");
+            System.out.println("3. Лето");
+            System.out.println("4. Осень");
+             System.out.println("0. Назад");
+            System.out.print("Ваш выбор: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    System.out.println("Season of WINTER: " + getSeasonName(Season.WINTER));
+                    break;
+                case 2:
+                    System.out.println("Season of SPRING: " + getSeasonName(Season.SPRING));
+                    break;
+                case 3:
+                     System.out.println("Season of SUMMER: " + getSeasonName(Season.SUMMER));
+                    break;
+                case 4:
+                     System.out.println("Season of AUTUMN: " + getSeasonName(Season.AUTUMN));
+                    break;
+                 case 0:
+                      return;
+                default:
+                    System.out.println("Неверный выбор. Попробуйте еще раз.");
+            }
         }
     }
 }
